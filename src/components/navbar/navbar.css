@@ -1,0 +1,14 @@
+body {
+  font-family: "Exo 2", sans-serif;
+}
+
+.navbar-ecotruck {
+  height: 60px;
+  background: linear-gradient(90deg, #064e3b, #0b7d5c);
+}
+.navbar-logo {
+  height: 35px;
+}
+.navbar-title {
+  font-size: 1rem;
+}
