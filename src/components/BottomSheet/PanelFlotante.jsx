@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./BottomSheet.css";
-import InfoPanel from "./Panels/InfoPanel";
-import AvisosPanel from "./Panels/AvisosPanel";
+import InfoPanel from "../Panels/InfoPanel";
+import AvisosPanel from "../Panels/AvisosPanel";
 
 const BottomSheet = ({ currentPanel, onHeightChange }) => {
   const minHeight = 80; // cerrado

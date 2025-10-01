@@ -7,6 +7,7 @@ const Sidebar = ({ onClose }) => {
   const [activeItem, setActiveItem] = useState("tracking");
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -64,8 +65,38 @@ const Sidebar = ({ onClose }) => {
     navigate("/");
   };
 
+  {
+    showLogoutModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+        <div className="bg-white rounded-xl shadow-xl p-6 w-[300px] text-center">
+          <h4 className="text-lg font-semibold mb-4 text-gray-800">
+            ¿Cerrar sesión?
+          </h4>
+          <p className="text-sm text-gray-600 mb-6">
+            Tu sesión se cerrará y volverás al inicio.
+          </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => setShowLogoutModal(false)}
+              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white text-sm"
+            >
+              <LogOut size={16} className="inline mr-1" />
+              Salir
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <aside className="h-full w-64 bg-slate-800 text-slate-100 flex flex-col shadow-lg">
+    <aside className="h-[520px] w-70 bg-slate-800 text-slate-100 flex flex-col shadow-lg">
       {/* Header */}
       <div className="bg-slate-700 border-b border-slate-600 px-4 py-5 relative text-center">
         <button
@@ -112,7 +143,11 @@ const Sidebar = ({ onClose }) => {
       {/* Footer */}
       <div className="bg-slate-700 border-t border-slate-600 px-5 py-4 text-center">
         <button
-          onClick={handleLogout}
+          onClick={() => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("rol");
+            navigate("/login");
+          }}
           className="w-full bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded flex items-center justify-center gap-2 text-sm transition"
         >
           <LogOut size={16} />

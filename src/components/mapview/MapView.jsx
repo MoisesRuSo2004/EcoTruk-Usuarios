@@ -48,10 +48,11 @@ const darkStyle = [
   { featureType: "poi.medical", stylers: [{ visibility: "on" }] },
 ];
 
-const MapView = () => {
+const MapView = ({ camionesActivos = [] }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const [mapType, setMapType] = useState("roadmap");
+  const markersRef = useRef([]);
 
   useEffect(() => {
     console.log("🧭 MapView mounted");
@@ -118,6 +119,31 @@ const MapView = () => {
         console.error("❌ Error al cargar Google Maps API:", err);
       });
   }, []);
+
+  useEffect(() => {
+    if (!mapInstance.current || camionesActivos.length === 0) return;
+
+    // Limpia marcadores anteriores
+    markersRef.current.forEach((m) => m.setMap(null));
+    markersRef.current = [];
+
+    camionesActivos.forEach((camion) => {
+      const { lat, lng } = camion.ubicacionActual;
+
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map: mapInstance.current,
+        icon: {
+          url: truckIcon,
+          scaledSize: new google.maps.Size(60, 60),
+          anchor: new google.maps.Point(30, 30),
+        },
+        title: camion.nombre || "Camión",
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [camionesActivos]);
 
   const zoomIn = () => {
     if (mapInstance.current) {

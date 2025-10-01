@@ -1,12 +1,77 @@
 import { useState } from "react";
-import { FaFacebookF, FaGoogle, FaTwitter } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function SignUp() {
-  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [accepted, setAccepted] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const isEmailValid = email.includes("@") && email.length >= 6;
+  const isPasswordValid = password.length >= 6;
+  const isFormValid =
+    name && isEmailValid && isPasswordValid && password === confirm && accepted;
+
+  const handleSubmit = async () => {
+    setError("");
+
+    if (!name || !email || !password || !confirm) {
+      setError("Todos los campos son obligatorios.");
+      return;
+    }
+    if (!email.includes("@") || email.length < 6) {
+      setError("Correo inválido. Debe contener '@' y tener formato válido.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+    if (!accepted) {
+      setError("Debes aceptar los términos.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/usuarios/registrar",
+        {
+          nombre: name,
+          correo: email,
+          password,
+          rol: "ROLE_CIUDADANO",
+          estado: "ACTIVO",
+          fechaRegistro: new Date().toISOString().split("T")[0], // formato YYYY-MM-DD
+        }
+      );
+
+      if (response.status === 201 || response.status === 200) {
+        navigate("/login");
+      }
+    } catch (err) {
+      const rawError = err.response?.data;
+
+      if (typeof rawError === "string" && rawError.includes("correo")) {
+        setError("Este correo ya está registrado.");
+      } else {
+        setError("Error al conectar con el servidor.");
+      }
+
+      console.error("Error completo:", rawError);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#3BBE7A] to-[#153307] p-4">
-      {/* Imagen de hojas siempre visible */}
+      {/* Imagen */}
       <div className="flex justify-center mt-6">
         <img
           src="../../../public/img/register.png"
@@ -15,90 +80,77 @@ export default function SignUp() {
         />
       </div>
 
-      {/* Contenido dinámico */}
-      {!showForm ? (
-        <div className="w-full max-w-sm bg-transparent text-center mb-6">
-          {/* Título */}
-          <h2 className="text-white text-3xl font mb-6">Sign Up</h2>
+      {/* Formulario */}
+      <div className="w-full max-w-md bg-white rounded-t-3xl shadow-lg p-12 h-1/2 mt-auto">
+        <h2 className="text-2xl font text-gray-800 text-center mb-4">
+          Registrarse
+        </h2>
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+        )}
 
-          {/* Botón Facebook */}
-          <button className="flex items-center justify-center gap-2 w-full bg-[#3b5998] text-white py-3 rounded-lg mb-4 shadow-md hover:opacity-90 transition">
-            <FaFacebookF /> Continuar con Facebook
-          </button>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
+          placeholder="Nombre completo"
+        />
 
-          {/* Botón Email/Phone */}
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
+          placeholder="Email"
+        />
+
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
+          placeholder="Password"
+        />
+
+        <input
+          type="password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
+          placeholder="Confirm Password"
+        />
+
+        <div className="flex items-center mb-6">
+          <input
+            type="checkbox"
+            checked={accepted}
+            onChange={(e) => setAccepted(e.target.checked)}
+            className="mr-2 accent-green-600"
+          />
+          <label className="text-sm text-gray-600">
+            Acepto los términos y condiciones
+          </label>
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-sm hover:bg-green-600 transition"
+        >
+          Registrarme
+        </button>
+
+        {/* Enlace a login */}
+        <p className="text-sm text-gray-600 text-center mt-6">
+          ¿Ya tienes una cuenta?{" "}
           <button
-            onClick={() => setShowForm(true)}
-            className="w-full border border-green-300 text-green-200 py-3 rounded-lg mb-6 hover:bg-green-800/40 transition"
+            onClick={() => navigate("/login")}
+            className="text-green-500 hover:underline font-medium"
           >
-            Usar Correo y Contraseña
+            Inicia sesión aquí
           </button>
-
-          {/* Opciones Google y Twitter */}
-          <div className="flex justify-center gap-6 mb-6">
-            <button className="p-3 bg-white rounded-full shadow-md hover:opacity-80 transition">
-              <FaGoogle className="text-red-500" />
-            </button>
-            <button className="p-3 bg-white rounded-full shadow-md hover:opacity-80 transition">
-              <FaTwitter className="text-sky-500" />
-            </button>
-          </div>
-
-          {/* Enlace de login */}
-          <p className="text-sm text-gray-200">
-            ¿Ya tienes una cuenta?{" "}
-            <a href="/login" className="text-green-300 hover:underline">
-              login
-            </a>
-          </p>
-        </div>
-      ) : (
-        <div className="w-full max-w-md bg-white rounded-t-3xl shadow-lg p-12 h-1/2 mt-auto">
-          <h2 className="text-2xl font text-gray-800 text-center mb-4">
-            Sign Up
-          </h2>
-
-          {/* Email */}
-          <div className="mb-4">
-            <input
-              type="email"
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none text-sm"
-              placeholder="Email"
-            />
-          </div>
-
-          {/* Password */}
-          <div className="mb-4">
-            <input
-              type="password"
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none text-sm"
-              placeholder="Password"
-            />
-          </div>
-
-          {/* Confirm Password */}
-          <div className="mb-4">
-            <input
-              type="password"
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none text-sm"
-              placeholder="Confirm Password"
-            />
-          </div>
-
-          {/* Checkbox */}
-          <div className="flex items-center mb-6">
-            <input type="checkbox" className="mr-2 accent-green-600" />
-            <label className="text-sm text-gray-600">
-              I accept the policy and terms
-            </label>
-          </div>
-
-          {/* Botón */}
-          <button className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-sm hover:bg-green-600 transition">
-            Sign Up
-          </button>
-        </div>
-      )}
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,13 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MapView from "../../components/mapview/MapView";
 import FloatingButtons from "../../components/floatingbuttons/FloatingButtons";
 import BottomSheet from "../../components/BottomSheet/PanelFlotante";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import { getRutasActivas } from "../../service/rutaService";
 
 const Home = () => {
   const [currentPanel, setCurrentPanel] = useState("info");
   const [bottomSheetHeight, setBottomSheetHeight] = useState(80);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [ubicacionCamion, setUbicacionCamion] = useState(null);
+  const [camionesActivos, setCamionesActivos] = useState([]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("rol");
+    window.location.href = "/";
+  };
+
+  {
+    showLogoutModal && (
+      <LogoutModal
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+      />
+    );
+  }
+
+  useEffect(() => {
+    const fetchCamiones = async () => {
+      try {
+        const response = await getRutasActivas();
+        setCamionesActivos(response.data);
+      } catch (err) {
+        console.error("❌ Error al obtener camiones activos:", err);
+      }
+    };
+
+    fetchCamiones();
+    const interval = setInterval(fetchCamiones, 3000); // actualiza cada 3 segundos
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="w-screen h-screen relative overflow-hidden bg-gray-100 font-sans">
@@ -19,7 +53,7 @@ const Home = () => {
 
       {/* Mapa fullscreen detrás */}
       <div className="absolute inset-0 z-10">
-        <MapView />
+        <MapView camionesActivos={camionesActivos} />
       </div>
 
       {/* Botones flotantes tipo Uber */}
