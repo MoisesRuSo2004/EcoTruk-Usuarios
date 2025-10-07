@@ -1,4 +1,4 @@
-import { List, AlertTriangle, Crosshair } from "lucide-react";
+import { Menu, AlertTriangle, Crosshair } from "lucide-react";
 import React, { useState } from "react";
 
 const FloatingButtons = ({
@@ -16,7 +16,7 @@ const FloatingButtons = ({
         aria-label="Abrir menú"
         onClick={onToggleSidebar}
       >
-        <List className="w-6 h-6" />
+        <Menu className="w-6 h-6" />
       </button>
 
       {/* 🔝 Navbar fijo arriba */}

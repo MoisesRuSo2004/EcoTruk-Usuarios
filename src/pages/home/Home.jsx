@@ -4,6 +4,22 @@ import FloatingButtons from "../../components/floatingbuttons/FloatingButtons";
 import BottomSheet from "../../components/BottomSheet/PanelFlotante";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import { getRutasActivas } from "../../service/rutaService";
+import { avanzarCamion } from "../../service/rutaService";
+import CalendarioModal from "../../components/modal/CalendarioModal";
+import NotificacionesModal from "../../components/modal/NotificacionesModal";
+
+const estiloPorTipo = {
+  primary:
+    "bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400",
+  success:
+    "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500",
+  error: "bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500",
+  warning:
+    "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400",
+  info: "bg-blue-light-50 text-blue-light-500 dark:bg-blue-light-500/15 dark:text-blue-light-500",
+  light: "bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80",
+  dark: "bg-gray-500 text-white dark:bg-white/5 dark:text-white",
+};
 
 const Home = () => {
   const [currentPanel, setCurrentPanel] = useState("info");
@@ -32,7 +48,7 @@ const Home = () => {
     const fetchCamiones = async () => {
       try {
         const response = await getRutasActivas();
-        setCamionesActivos(response.data);
+        setCamionesActivos(response);
       } catch (err) {
         console.error("❌ Error al obtener camiones activos:", err);
       }
@@ -42,6 +58,23 @@ const Home = () => {
     const interval = setInterval(fetchCamiones, 3000); // actualiza cada 3 segundos
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const moverTodosLosCamiones = async () => {
+      try {
+        for (const camion of camionesActivos) {
+          if (camion.id) {
+            await avanzarCamion(camion.id);
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error al mover camiones activos:", err);
+      }
+    };
+
+    const interval = setInterval(moverTodosLosCamiones, 5000);
+    return () => clearInterval(interval);
+  }, [camionesActivos]);
 
   return (
     <div className="w-screen h-screen relative overflow-hidden bg-gray-100 font-sans">
@@ -75,6 +108,9 @@ const Home = () => {
           onHeightChange={setBottomSheetHeight}
         />
       </div>
+      {/* ✅ Aquí montamos el modal */}
+      <CalendarioModal />
+      <NotificacionesModal />
     </div>
   );
 };

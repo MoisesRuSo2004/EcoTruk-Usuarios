@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { MapPin, User, Settings, Calendar, LogOut, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import "../../index.css";
 
 const Sidebar = ({ onClose }) => {
   const [activeItem, setActiveItem] = useState("tracking");
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -16,34 +16,23 @@ const Sidebar = ({ onClose }) => {
         const decoded = jwtDecode(token);
         setUserName(decoded.sub);
       } catch (err) {
-        console.error("Error al decodificar el token:", err);
+        console.error("Error al decodificar token:", err);
       }
     }
   }, []);
 
   const menuItems = [
-    {
-      id: "tracking",
-      icon: <MapPin size={18} />,
-      label: "Seguimiento de Camiones",
-      path: "/tracking",
-    },
-    {
-      id: "calendar",
-      icon: <Calendar size={18} />,
-      label: "Calendario",
-      path: "/calendario",
-    },
+    { id: "calendar", icon: <Calendar size={18} />, label: "Calendario" },
     {
       id: "notifications",
       icon: <Bell size={18} />,
       label: "Notificaciones",
-      path: "/notificaciones",
+      //path: "/notificaciones",
     },
     {
       id: "profile",
       icon: <User size={18} />,
-      label: "Mi Perfil",
+      label: "Perfil",
       path: "/perfil",
     },
     {
@@ -56,6 +45,15 @@ const Sidebar = ({ onClose }) => {
 
   const handleItemClick = (item) => {
     setActiveItem(item.id);
+    if (item.id === "calendar") {
+      document.getElementById("modal_calendario")?.showModal();
+      return;
+    }
+    if (item.id === "notifications") {
+      document.getElementById("modal_notificaciones")?.showModal();
+      return;
+    }
+
     if (item.path) navigate(item.path);
   };
 
@@ -65,93 +63,59 @@ const Sidebar = ({ onClose }) => {
     navigate("/");
   };
 
-  {
-    showLogoutModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-        <div className="bg-white rounded-xl shadow-xl p-6 w-[300px] text-center">
-          <h4 className="text-lg font-semibold mb-4 text-gray-800">
-            ¿Cerrar sesión?
-          </h4>
-          <p className="text-sm text-gray-600 mb-6">
-            Tu sesión se cerrará y volverás al inicio.
-          </p>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => setShowLogoutModal(false)}
-              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white text-sm"
-            >
-              <LogOut size={16} className="inline mr-1" />
-              Salir
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <aside className="h-[520px] w-70 bg-slate-800 text-slate-100 flex flex-col shadow-lg">
-      {/* Header */}
-      <div className="bg-slate-700 border-b border-slate-600 px-4 py-5 relative text-center">
+    <aside className="h-[520px] w-72 bg-[#1E293B] text-slate-100 flex flex-col rounded-2xl shadow-xl overflow-hidden transition-all duration-300">
+      <div className="p-5 flex flex-col items-center relative bg-[#0F172A]">
         <button
-          className="absolute top-4 right-4 text-slate-300 hover:text-white text-lg"
-          aria-label="Cerrar sidebar"
+          className="absolute top-3 right-3 text-slate-400 hover:text-white transition"
           onClick={onClose}
         >
           ✕
         </button>
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-lg">
-            {userName.charAt(0).toUpperCase()}
-          </div>
-          <h6 className="text-base font-semibold">{userName}</h6>
-          <small className="text-slate-400 text-sm">Ciudadano</small>
+
+        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-sky-600 to-sky-400 flex items-center justify-center text-white font-semibold text-lg mb-3 shadow-inner">
+          {userName ? userName.charAt(0).toUpperCase() : "U"}
         </div>
+
+        <h6 className="text-sm font-semibold text-white">
+          {userName || "Usuario"}
+        </h6>
+        <small className="text-xs text-slate-400">Ciudadano</small>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="flex-1 overflow-y-auto py-3 px-3">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => handleItemClick(item)}
-            className={`w-full text-left px-5 py-3 flex items-center gap-3 text-sm transition ${
-              activeItem === item.id
-                ? "bg-blue-600 text-white"
-                : "text-slate-300 hover:bg-slate-700 hover:text-white"
-            }`}
-            aria-current={activeItem === item.id ? "page" : undefined}
+            className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+          ${
+            activeItem === item.id
+              ? "bg-gradient-to-r from-sky-600 to-sky-400 text-white shadow-md"
+              : "hover:bg-[#334155] text-slate-300 hover:text-white"
+          }`}
           >
             <span
-              className={`${
-                activeItem === item.id ? "opacity-100" : "opacity-80"
+              className={`transition-transform ${
+                activeItem === item.id
+                  ? "scale-110 text-white"
+                  : "text-slate-400"
               }`}
             >
               {item.icon}
             </span>
-            {item.label}
+            <span className="text-sm">{item.label}</span>
           </button>
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="bg-slate-700 border-t border-slate-600 px-5 py-4 text-center">
+      <div className="p-4 bg-[#0F172A]">
         <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("rol");
-            navigate("/login");
-          }}
-          className="w-full bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded flex items-center justify-center gap-2 text-sm transition"
+          onClick={handleLogout}
+          className="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition-all"
         >
           <LogOut size={16} />
-          Cerrar Sesión
+          Cerrar sesión
         </button>
       </div>
     </aside>

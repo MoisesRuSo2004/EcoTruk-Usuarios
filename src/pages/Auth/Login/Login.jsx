@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock } from "lucide-react";
 import { FaGoogle, FaTwitter } from "react-icons/fa";
 import axios from "axios";
 
@@ -8,7 +7,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const navigate = useNavigate();
 
@@ -17,6 +15,8 @@ const Login = () => {
     setError("");
 
     try {
+      console.log("Enviando login con:", { correo: email, password });
+
       const response = await axios.post(
         "http://localhost:8080/api/auth/login",
         {
@@ -25,13 +25,26 @@ const Login = () => {
         }
       );
 
-      const { token, rol } = response.data;
+      const { token, rol } = response.data || {};
+      console.log("Respuesta del backend:", response.data);
 
-      if (rol === "ROLE_CIUDADANO") {
-        localStorage.setItem("token", token);
-        localStorage.setItem("rol", rol);
-        navigate("/home"); // o la ruta principal del ciudadano
+      if (!token || !rol) {
+        console.warn("Token o rol inválido:", response.data);
+        setError("Respuesta inválida del servidor.");
+        return;
+      }
+
+      const normalizedRol = rol.toUpperCase().trim();
+      console.log("Rol recibido:", normalizedRol);
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("rol", normalizedRol);
+
+      if (normalizedRol === "CIUDADANO") {
+        console.log("Redirigiendo a /home");
+        navigate("/home");
       } else {
+        console.warn("Rol no autorizado:", normalizedRol);
         setError("Acceso denegado: esta aplicación es solo para ciudadanos.");
       }
     } catch (err) {
@@ -41,7 +54,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#3BBE7A] to-[#153307] flex flex-col items-center font-inter px-6 relative ">
+    <div className="min-h-screen bg-gradient-to-b from-[#3BBE7A] to-[#153307] flex flex-col items-center font-inter px-6 relative">
       {/* Encabezado */}
       <div className="text-center mt-10 mb-2">
         <h2 className="text-white text-3xl font-extrabold">Hello.</h2>
@@ -50,22 +63,18 @@ const Login = () => {
         </h2>
       </div>
 
-      {/* Imagen de hojas */}
+      {/* Imagen */}
       <div className="flex justify-center mb-6">
-        <img
-          src="../../../public/img/register.png" // Asegúrate de colocar la imagen en /public
-          alt="Leaves"
-          className="w-40 h-40"
-        />
+        <img src="/img/register.png" alt="Leaves" className="w-40 h-40" />
       </div>
 
-      {/* Contenedor principal */}
-      <div className="w-full  max-w-md bg-white rounded-3xl shadow-lg p-6 z-40 -mb-2 ">
-        <h2 className="text-2xl font text-gray-800 text-center mb-2">
-          Bienvenido!
-        </h2>
+      {/* Formulario */}
+      <form
+        onSubmit={handleLogin}
+        className="w-full max-w-md bg-white rounded-3xl shadow-lg p-6 z-40 -mb-2"
+      >
+        <h2 className="text-2xl text-gray-800 text-center mb-2">Bienvenido!</h2>
 
-        {/* Email */}
         <div className="mb-4">
           <input
             type="email"
@@ -73,10 +82,10 @@ const Login = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
 
-        {/* Password */}
         <div className="mb-4">
           <input
             type="password"
@@ -84,10 +93,10 @@ const Login = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
 
-        {/* Checkbox */}
         <div className="flex items-center mb-6">
           <input
             type="checkbox"
@@ -98,15 +107,17 @@ const Login = () => {
           <label className="text-sm text-gray-600">Recordarme</label>
         </div>
 
-        {/* Botón */}
+        {error && (
+          <div className="text-red-500 text-sm mb-4 text-center">{error}</div>
+        )}
+
         <button
-          onClick={handleLogin}
+          type="submit"
           className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-sm hover:bg-green-600 transition"
         >
-          Iniciar Sesion
+          Iniciar Sesión
         </button>
 
-        {/* Opciones sociales */}
         <div className="flex justify-center gap-6 mt-6">
           <button className="p-3 bg-white rounded-full shadow hover:shadow-md transition">
             <FaGoogle className="text-red-500" />
@@ -115,7 +126,8 @@ const Login = () => {
             <FaTwitter className="text-sky-500" />
           </button>
         </div>
-      </div>
+      </form>
+
       {/* Enlace para registrarse */}
       <div className="mt-6 text-center">
         <p className="text-sm text-white">
