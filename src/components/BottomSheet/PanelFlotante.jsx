@@ -3,9 +3,9 @@ import "./BottomSheet.css";
 import InfoPanel from "../Panels/InfoPanel";
 import AvisosPanel from "../Panels/AvisosPanel";
 
-const BottomSheet = ({ currentPanel, onHeightChange }) => {
-  const minHeight = 80; // cerrado
-  const maxHeight = window.innerHeight * 0.6; // 60% de pantalla
+const BottomSheet = ({ currentPanel, onHeightChange, infoSimulada }) => {
+  const minHeight = 155; // cerrado
+  const maxHeight = window.innerHeight * 0.8; // 60% de pantalla
 
   const [height, setHeight] = useState(minHeight);
   const [isDragging, setIsDragging] = useState(false);
@@ -21,8 +21,10 @@ const BottomSheet = ({ currentPanel, onHeightChange }) => {
     switch (currentPanel) {
       case "avisos":
         return <AvisosPanel />;
+      case "info":
+        return <InfoPanel info={infoSimulada} />;
       default:
-        return <InfoPanel />;
+        return null;
     }
   };
 

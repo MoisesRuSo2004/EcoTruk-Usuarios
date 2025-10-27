@@ -3,11 +3,11 @@
   left: 0px;
   right: 0px;
   bottom: 0;
-  background: #1e293b;
-  color: white;
+  background: #f5f6f7; /* neutro claro */
+  color: #2d3436; /* gris carbón */
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* sombra más suave */
   transition: height 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -16,9 +16,9 @@
 .drag-handle {
   width: 80px;
   height: 6px;
-  background: #666;
+  background: #a0a0a0; /* gris medio */
   border-radius: 3px;
-  margin: 10px auto;
+  margin: 8px auto;
   cursor: grab;
 }
 

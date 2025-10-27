@@ -2,83 +2,37 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import truckIcon from "../../assets/truck/truck.png";
-import ubicacionIcon from "../../../public/ubicacion.svg";
 import { getRutasVisualizacion } from "../../service/rutaService";
+import ZonasDelimitadas from "./ZonasDelimitadas";
+import Lottie from "lottie-react";
+import ubicacionAnimada from "../../assets/animation/Dot loading.json";
+import { createRoot } from "react-dom/client";
 
-const darkStyle = [
-  { elementType: "geometry", stylers: [{ color: "#0f172a" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#e2e8f0" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#0f172a" }] },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ color: "#1e293b" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [{ color: "#334155" }],
-  },
-  {
-    featureType: "road.local",
-    elementType: "geometry",
-    stylers: [{ color: "#1e293b" }],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#94a3b8" }],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#0e3b59" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [{ color: "#14532d" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#22c55e" }],
-  },
-  { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "transit", stylers: [{ visibility: "off" }] },
-  { featureType: "poi.medical", stylers: [{ visibility: "on" }] },
-];
-
-const MapView = () => {
+const MapView = ({
+  ubicacionSimulada,
+  ubicacionReal,
+  mostrarZonas,
+  setMapInstance,
+}) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markersRef = useRef([]);
-  const polylinesRef = useRef([]);
-  const [mapType, setMapType] = useState("roadmap");
-
-  // 🔄 Actualiza camiones cada 3 segundos
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getRutasVisualizacion()
-        .then((camiones) => renderizarCamiones(camiones))
-        .catch((err) => console.error("❌ Error al obtener rutas:", err));
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const overlaysRef = useRef([]);
+  const [mapReady, setMapReady] = useState(false);
+  const [rutasActivas, setRutasActivas] = useState([]);
 
   // 🗺️ Inicializa el mapa
   useEffect(() => {
     const loader = new Loader({
       apiKey: "AIzaSyA4cpX2UWFERFOLEWasaZo8cePYke-G1W0",
       version: "weekly",
+      libraries: ["geometry"],
     });
 
     loader.load().then(() => {
       const map = new google.maps.Map(mapRef.current, {
         center: { lat: 10.391, lng: -75.4794 },
         zoom: 14,
-        styles: darkStyle,
         disableDefaultUI: true,
         restriction: {
           latLngBounds: {
@@ -89,50 +43,139 @@ const MapView = () => {
           },
           strictBounds: true,
         },
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+          style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+          position: google.maps.ControlPosition.TOP_RIGHT,
+        },
       });
 
       mapInstance.current = map;
-
-      new google.maps.Marker({
-        position: { lat: 10.391, lng: -75.4794 },
-        map,
-        icon: {
-          url: ubicacionIcon,
-          scaledSize: new google.maps.Size(50, 60),
-        },
-      });
+      setMapInstance(map);
+      setMapReady(true);
     });
   }, []);
 
-  // 🚚 Renderiza camiones y detecta movimiento
-  const renderizarCamiones = (camiones) => {
-    if (!mapInstance.current) {
-      console.warn("⚠️ mapInstance no está listo");
+  // 🔄 Cargar rutas activas
+  useEffect(() => {
+    getRutasVisualizacion()
+      .then(setRutasActivas)
+      .catch((err) => console.error("❌ Error al obtener rutas activas:", err));
+  }, []);
+
+  // 📍 Validar proximidad a rutas
+  useEffect(() => {
+    if (
+      !ubicacionSimulada ||
+      rutasActivas.length === 0 ||
+      !window.google?.maps?.geometry?.spherical
+    )
       return;
+
+    const puntoUsuario = new google.maps.LatLng(
+      ubicacionSimulada.lat,
+      ubicacionSimulada.lng
+    );
+
+    for (const ruta of rutasActivas) {
+      const puntos = ruta.puntosInterpolados || [];
+      for (let i = 0; i < puntos.length - 1; i++) {
+        const puntoA = new google.maps.LatLng(puntos[i].lat, puntos[i].lng);
+        const puntoB = new google.maps.LatLng(
+          puntos[i + 1].lat,
+          puntos[i + 1].lng
+        );
+
+        const distancia = google.maps.geometry.spherical.computeDistanceBetween(
+          puntoUsuario,
+          google.maps.geometry.spherical.interpolate(puntoA, puntoB, 0.5)
+        );
+
+        if (distancia <= 100) {
+          console.log("✅ Ruta cercana:", ruta.nombre);
+          console.log("🚚 Camión asignado:", ruta.id);
+          return;
+        }
+      }
     }
 
-    console.log("🔄 Actualizando camiones en el mapa...");
+    console.log("⚠️ Ubicación fuera de rutas conocidas");
+  }, [ubicacionSimulada, rutasActivas]);
 
-    // Limpia anteriores
+  // 📍 Renderiza marcador animado con Lottie
+  const renderizarUbicacionAnimada = (ubicacion) => {
+    if (!mapInstance.current || !ubicacion) return;
+
+    const overlayDiv = document.createElement("div");
+    overlayDiv.style.position = "absolute";
+    overlayDiv.style.transform = "translate(-50%, -50%)";
+    overlayDiv.style.width = "60px";
+    overlayDiv.style.height = "60px";
+    overlayDiv.style.zIndex = "999";
+
+    const container = document.createElement("div");
+    overlayDiv.appendChild(container);
+
+    const Overlay = class extends google.maps.OverlayView {
+      onAdd() {
+        const panes = this.getPanes();
+        panes.overlayMouseTarget.appendChild(overlayDiv);
+      }
+
+      draw() {
+        const projection = this.getProjection();
+        const position = new google.maps.LatLng(ubicacion.lat, ubicacion.lng);
+        const point = projection.fromLatLngToDivPixel(position);
+        overlayDiv.style.left = `${point.x}px`;
+        overlayDiv.style.top = `${point.y}px`;
+      }
+
+      onRemove() {
+        overlayDiv.parentNode.removeChild(overlayDiv);
+      }
+    };
+
+    const overlay = new Overlay();
+    overlay.setMap(mapInstance.current);
+    overlaysRef.current.push(overlay);
+
+    createRoot(container).render(
+      <Lottie animationData={ubicacionAnimada} loop={true} />
+    );
+  };
+
+  // 🧪 Renderiza simulación
+  useEffect(() => {
+    if (ubicacionSimulada) {
+      renderizarUbicacionAnimada(ubicacionSimulada);
+      mapInstance.current?.panTo(ubicacionSimulada);
+    }
+  }, [ubicacionSimulada]);
+
+  // 📍 Renderiza ubicación real
+  useEffect(() => {
+    if (ubicacionReal) {
+      renderizarUbicacionAnimada(ubicacionReal);
+      mapInstance.current?.panTo(ubicacionReal);
+    }
+  }, [ubicacionReal]);
+
+  // 🚚 Renderiza camiones
+  const renderizarCamiones = (camiones) => {
+    if (!mapInstance.current) return;
+
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
 
-    camiones.forEach((camion, index) => {
+    camiones.forEach((camion) => {
       const { ubicacionActual, nombre, id } = camion;
-
       if (
         !ubicacionActual ||
         typeof ubicacionActual.lat !== "number" ||
         typeof ubicacionActual.lng !== "number"
-      ) {
-        console.warn(
-          `⚠️ Coordenadas inválidas para camión ${nombre || id}:`,
-          ubicacionActual
-        );
+      )
         return;
-      }
 
-      // Crear nuevo marcador
       const marker = new google.maps.Marker({
         position: ubicacionActual,
         map: mapInstance.current,
@@ -150,47 +193,20 @@ const MapView = () => {
         },
       });
 
-      // Detectar si el camión se movió
-      const prevMarker = markersRef.current[index];
-      const prevPos = prevMarker?.getPosition?.();
-      const moved =
-        !prevPos ||
-        Math.abs(prevPos.lat() - ubicacionActual.lat) > 0.00001 ||
-        Math.abs(prevPos.lng() - ubicacionActual.lng) > 0.00001;
-
-      if (moved) {
-        console.log(
-          `🚚 Camión ${nombre || id} se movió a (${ubicacionActual.lat}, ${
-            ubicacionActual.lng
-          })`
-        );
-      } else {
-        console.log(`🧍 Camión ${nombre || id} no se ha movido`);
-      }
-
       markersRef.current.push(marker);
     });
   };
 
-  const zoomIn = () => {
-    if (mapInstance.current) {
-      mapInstance.current.setZoom(mapInstance.current.getZoom() + 1);
-    }
-  };
+  // 🔄 Actualiza camiones cada 3 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getRutasVisualizacion()
+        .then((camiones) => renderizarCamiones(camiones))
+        .catch((err) => console.error("❌ Error al obtener rutas:", err));
+    }, 3000);
 
-  const zoomOut = () => {
-    if (mapInstance.current) {
-      mapInstance.current.setZoom(mapInstance.current.getZoom() - 1);
-    }
-  };
-
-  const toggleMapType = () => {
-    if (mapInstance.current) {
-      const newType = mapType === "roadmap" ? "satellite" : "roadmap";
-      mapInstance.current.setMapTypeId(newType);
-      setMapType(newType);
-    }
-  };
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="w-full h-screen relative">
@@ -198,6 +214,9 @@ const MapView = () => {
         ref={mapRef}
         className="absolute top-0 left-0 w-full h-full z-10 bg-gray-900"
       />
+      {mapReady && mostrarZonas && (
+        <ZonasDelimitadas map={mapInstance.current} visible={mostrarZonas} />
+      )}
     </div>
   );
 };

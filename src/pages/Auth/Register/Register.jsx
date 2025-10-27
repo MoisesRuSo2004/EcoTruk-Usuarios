@@ -1,42 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import LoginHeader from "../../../components/login/LoginHeader.jsx"; // ajusta la ruta si es necesario
 
-export default function SignUp() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+export default function RegistroEcoTruck() {
+  const [nombre, setNombre] = useState("");
+  const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [accepted, setAccepted] = useState(false);
+  const [confirmar, setConfirmar] = useState("");
+  const [aceptado, setAceptado] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const isEmailValid = email.includes("@") && email.length >= 6;
-  const isPasswordValid = password.length >= 6;
-  const isFormValid =
-    name && isEmailValid && isPasswordValid && password === confirm && accepted;
+  const esCorreoValido = correo.includes("@") && correo.length >= 6;
+  const esPasswordValido = password.length >= 6;
+  const formularioValido =
+    nombre &&
+    esCorreoValido &&
+    esPasswordValido &&
+    password === confirmar &&
+    aceptado;
 
-  const handleSubmit = async () => {
+  const registrarUsuario = async () => {
     setError("");
 
-    if (!name || !email || !password || !confirm) {
-      setError("Todos los campos son obligatorios.");
-      return;
-    }
-    if (!email.includes("@") || email.length < 6) {
-      setError("Correo inválido. Debe contener '@' y tener formato válido.");
-      return;
-    }
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
-    if (password !== confirm) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-    if (!accepted) {
-      setError("Debes aceptar los términos.");
+    if (!formularioValido) {
+      setError("Completa todos los campos correctamente.");
       return;
     }
 
@@ -44,12 +33,12 @@ export default function SignUp() {
       const response = await axios.post(
         "http://localhost:8080/api/usuarios/registrar",
         {
-          nombre: name,
-          correo: email,
+          nombre,
+          correo,
           password,
           rol: "ROLE_CIUDADANO",
           estado: "ACTIVO",
-          fechaRegistro: new Date().toISOString().split("T")[0], // formato YYYY-MM-DD
+          fechaRegistro: new Date().toISOString().split("T")[0],
         }
       );
 
@@ -57,95 +46,104 @@ export default function SignUp() {
         navigate("/login");
       }
     } catch (err) {
-      const rawError = err.response?.data;
-
-      if (typeof rawError === "string" && rawError.includes("correo")) {
+      const raw = err.response?.data;
+      if (typeof raw === "string" && raw.includes("correo")) {
         setError("Este correo ya está registrado.");
       } else {
         setError("Error al conectar con el servidor.");
       }
-
-      console.error("Error completo:", rawError);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#3BBE7A] to-[#153307] p-4">
-      {/* Imagen */}
-      <div className="flex justify-center mt-6">
-        <img
-          src="../../../public/img/register.png"
-          alt="Leaves"
-          className="w-52 h-52"
-        />
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-[#2E8B00] to-[#2E8B00] px-0 py-0 font-inter">
+      {/* Navbar */}
+      <LoginHeader />
+
+      {/* Encabezado */}
+      <div className="text-center mb-8 mt-5">
+        <h1 className="text-white text-1xl font-bold">
+          Hola, futuro ciudadano EcoTruck
+        </h1>
+        <p className="text-white text-lg mt-2">
+          Regístrate para comenzar tu recorrido limpio
+        </p>
       </div>
 
       {/* Formulario */}
-      <div className="w-full max-w-md bg-white rounded-t-3xl shadow-lg p-12 h-1/2 mt-auto">
-        <h2 className="text-2xl font text-gray-800 text-center mb-4">
-          Registrarse
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-lg p-10">
+        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+          Crear cuenta
         </h2>
+
         {error && (
-          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+          <p className="text-red-600 text-sm text-center mb-4">{error}</p>
         )}
 
         <input
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
           placeholder="Nombre completo"
+          className="w-full bg-gray-100 text-gray-800 rounded-xl px-5 py-3 mb-4 text-sm outline-none focus:ring-2 focus:ring-[#2ecc71] transition"
         />
 
         <input
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
-          placeholder="Email"
+          value={correo}
+          onChange={(e) => setCorreo(e.target.value)}
+          placeholder="Correo electrónico"
+          className="w-full bg-gray-100 text-gray-800 rounded-xl px-5 py-3 mb-4 text-sm outline-none focus:ring-2 focus:ring-[#2ecc71] transition"
         />
 
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
-          placeholder="Password"
+          placeholder="Contraseña"
+          className="w-full bg-gray-100 text-gray-800 rounded-xl px-5 py-3 mb-4 text-sm outline-none focus:ring-2 focus:ring-[#2ecc71] transition"
         />
 
         <input
           type="password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="w-full bg-gray-100 text-gray-800 rounded-lg px-4 py-3 outline-none text-sm mb-4"
-          placeholder="Confirm Password"
+          value={confirmar}
+          onChange={(e) => setConfirmar(e.target.value)}
+          placeholder="Confirmar contraseña"
+          className="w-full bg-gray-100 text-gray-800 rounded-xl px-5 py-3 mb-4 text-sm outline-none focus:ring-2 focus:ring-[#2ecc71] transition"
         />
 
         <div className="flex items-center mb-6">
           <input
             type="checkbox"
-            checked={accepted}
-            onChange={(e) => setAccepted(e.target.checked)}
-            className="mr-2 accent-green-600"
+            checked={aceptado}
+            onChange={(e) => setAceptado(e.target.checked)}
+            className="mr-2 accent-green-600 w-5 h-5"
           />
           <label className="text-sm text-gray-600">
-            Acepto los términos y condiciones
+            Acepto los{" "}
+            <a href="#" className="text-[#2ecc71] hover:underline font-medium">
+              términos y condiciones
+            </a>
           </label>
         </div>
 
         <button
-          onClick={handleSubmit}
-          className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-sm hover:bg-green-600 transition"
+          onClick={registrarUsuario}
+          disabled={!formularioValido}
+          className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+            formularioValido
+              ? "bg-[#2ecc71] text-white hover:bg-[#27ae60] shadow-md hover:shadow-lg"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
         >
           Registrarme
         </button>
 
-        {/* Enlace a login */}
         <p className="text-sm text-gray-600 text-center mt-6">
-          ¿Ya tienes una cuenta?{" "}
+          ¿Ya tienes cuenta?{" "}
           <button
             onClick={() => navigate("/login")}
-            className="text-green-500 hover:underline font-medium"
+            className="text-[#2ecc71] hover:underline font-medium"
           >
             Inicia sesión aquí
           </button>

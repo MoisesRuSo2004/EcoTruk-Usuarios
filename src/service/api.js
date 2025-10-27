@@ -8,13 +8,13 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  // Evita meter el token en el login
-  if (!config.url.endsWith("/auth/login")) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const token = localStorage.getItem("token");
+
+  // Solo agrega el token si existe y no es una llamada al login
+  if (token && !config.url.includes("/auth/login")) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
