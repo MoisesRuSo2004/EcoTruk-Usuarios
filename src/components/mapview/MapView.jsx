@@ -23,8 +23,15 @@ const MapView = ({
 
   // 🗺️ Inicializa el mapa
   useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API;
+
+    if (!apiKey) {
+      console.error("❌ No se encontró la API Key de Google Maps");
+      return;
+    }
+
     const loader = new Loader({
-      apiKey: "AIzaSyA4cpX2UWFERFOLEWasaZo8cePYke-G1W0",
+      apiKey,
       version: "weekly",
       libraries: ["geometry"],
     });
