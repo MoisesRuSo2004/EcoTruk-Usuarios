@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Shield, Lock } from "lucide-react";
+import { User, Shield, Lock, BadgeCheck, CalendarDays } from "lucide-react";
 import Lottie from "lottie-react";
 import seguridadAnimacion from "../../assets/animation/Pin-code.json";
 
@@ -11,10 +11,28 @@ const InicioPerfil = ({ usuario, setSeccion }) => {
         <div className="w-24 h-24 mx-auto bg-gray-200 rounded-full flex items-center justify-center">
           <User className="text-gray-500 w-12 h-12" />
         </div>
-        <h1 className="text-gray-800 text-2xl font-medium mt-4 ">
+        <h1 className="text-gray-800 text-2xl font-medium mt-4">
           {usuario.nombre}
         </h1>
         <p className="text-gray-600 font-medium">{usuario.correo}</p>
+        <p className="text-sm text-gray-500 mt-1">
+          Rol: <span className="font-semibold">{usuario.rol}</span> | Estado:{" "}
+          <span
+            className={`font-semibold ${
+              usuario.estado === "ACTIVO" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {usuario.estado}
+          </span>
+        </p>
+        <p className="text-sm text-gray-500">
+          Registrado el{" "}
+          {new Date(usuario.fechaRegistro).toLocaleDateString("es-CO", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
       </div>
 
       {/* Botones de secciones */}
