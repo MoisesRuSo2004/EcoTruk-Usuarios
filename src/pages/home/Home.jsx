@@ -39,7 +39,7 @@ const Home = () => {
   }
 
   const handleConectar = () => {
-    setMostrarModalUbicacion(true); // 👈 muestra el modal
+    setMostrarModalUbicacion(true);
   };
 
   const usarSimulacion = () => {
