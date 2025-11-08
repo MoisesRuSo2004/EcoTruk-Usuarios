@@ -96,9 +96,9 @@ const Sidebar = ({ onClose }) => {
   };
 
   return (
-    <aside className="h-[100%] w-[30vw] bg-[#f5f6f7] text-[#0F172A] flex flex-col rounded-2xl shadow-xl overflow-hidden transition-all duration-300 font-inter">
+    <aside className="h-full w-full min-w-[280px] max-w-[320px] bg-[#f5f6f7] text-[#0F172A] flex flex-col rounded-2xl shadow-xl overflow-hidden transition-all duration-300 font-inter">
       {/* 🧑 Encabezado */}
-      <div className="p-5 flex flex-col items-center relative bg-[#e6e7e8]">
+      <div className="p-5 flex flex-col items-center relative bg-[#e6e7e8] shrink-0">
         <button
           className="absolute top-3 right-3 text-[#94A3B8] hover:text-[#0F172A] transition"
           onClick={onClose}
@@ -106,12 +106,12 @@ const Sidebar = ({ onClose }) => {
           <X size={18} />
         </button>
 
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white font-semibold text-lg mb-3 shadow-inner">
+        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white font-semibold text-lg mb-3 shadow-inner shrink-0">
           {userName ? userName.charAt(0).toUpperCase() : "U"}
         </div>
 
-        <h6 className="text-sm font-semibold">{userName || "Usuario"}</h6>
-        <small className="text-xs text-[#94A3B8]">Ciudadano</small>
+        <h6 className="text-sm font-semibold whitespace-nowrap">{userName || "Usuario"}</h6>
+        <small className="text-xs text-[#94A3B8] whitespace-nowrap">Ciudadano</small>
       </div>
 
       {/* 📋 Menú */}
@@ -137,7 +137,7 @@ const Sidebar = ({ onClose }) => {
               }`}
             >
               <span
-                className={`transition-transform ${
+                className={`transition-transform shrink-0 ${
                   activeItem === item.id
                     ? "scale-110 text-white"
                     : "text-[#0F172A]"
@@ -145,20 +145,20 @@ const Sidebar = ({ onClose }) => {
               >
                 {item.icon}
               </span>
-              <span className="text-sm">{item.label}</span>
+              <span className="text-sm whitespace-nowrap">{item.label}</span>
             </button>
           </motion.li>
         ))}
       </motion.ul>
 
       {/* 🔒 Logout */}
-      <div className="p-4 bg-[#e6e7e8]">
+      <div className="p-4 bg-[#e6e7e8] shrink-0">
         <button
           onClick={handleLogout}
           className="w-full bg-[#008543] hover:bg-[#145A32] text-white py-2 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition-all"
         >
-          <LogOut size={16} />
-          Cerrar sesión
+          <LogOut size={16} className="shrink-0" />
+          <span className="whitespace-nowrap">Cerrar sesión</span>
         </button>
       </div>
     </aside>
