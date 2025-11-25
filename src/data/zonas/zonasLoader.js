@@ -4,7 +4,7 @@ export const cargarZonas = async () => {
       nombre: "Zona 1: Bocagrande - Castillo Grande - Laguito",
       color: "#22c55e",
       camion: "Camión A",
-      url: "/src/data/zonas/zona1.geojson",
+      url: "/data/zonas/zona1.geojson",
     },
   ];
 
