@@ -1,49 +1,21 @@
 import { motion } from "motion/react";
 import { Settings2, Info } from "lucide-react";
 import { useState } from "react";
-import ConfirmModal from "./ConfirmModal";
 
-
-const BotonConectar = ({ onClick, setCurrentPanel, onDisconnect, isConnected }) => {
+const BotonConectar = ({ onClick, setCurrentPanel }) => {
   const [loading, setLoading] = useState(false);
-  // usar estado derivado si se provee
-  const conectado = typeof isConnected !== "undefined" ? isConnected : undefined;
+  const [conectado, setConectado] = useState(false);
 
   const handleClick = () => {
-    // Si ya está conectado, abrir modal de confirmación
-    if (conectado) {
-      setShowModal(true);
-      return;
-    }
-
-    // inicio de conexión
     setLoading(true);
-    if (typeof onClick === "function") onClick(); // dispara tu lógica de conexión
+    onClick(); // dispara tu lógica de conexión
 
     // Simula tiempo de conexión (ej. 3 segundos)
     setTimeout(() => {
       setLoading(false);
-      // si no hay estado derivado, actualizar local (retrocompatibilidad)
-      if (typeof isConnected === "undefined") {
-        // eslint-disable-next-line no-unused-expressions
-        (function () {
-          // mantener compatibilidad: actualizar estado interno si existiera
-        })();
-      }
+      setConectado(true);
       setCurrentPanel("info"); // 👈 cuando conecta, abre InfoPanel
     }, 3000);
-  };
-
-  const [showModal, setShowModal] = useState(false);
-
-  const confirmDisconnect = () => {
-    setShowModal(false);
-    setConectado(false);
-    if (typeof onDisconnect === "function") onDisconnect();
-  };
-
-  const cancelDisconnect = () => {
-    setShowModal(false);
   };
 
   return (
@@ -54,7 +26,7 @@ const BotonConectar = ({ onClick, setCurrentPanel, onDisconnect, isConnected }) 
           <Settings2 size={40} />
         </button>
 
-  {/* Botón Conectar */}
+        {/* Botón Conectar */}
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -66,12 +38,12 @@ const BotonConectar = ({ onClick, setCurrentPanel, onDisconnect, isConnected }) 
           }}
           className={`w-80 max-w-md mx-auto text-white text-center py-3 rounded-full shadow-lg font-semibold text-base transition-all duration-200 ${
             conectado
-              ? "bg-red-600 hover:bg-red-700"
+              ? "bg-green-700 hover:bg-green-800"
               : "bg-[#008543] hover:bg-[#145A32]"
           }`}
           onClick={handleClick}
           aria-label="Conectar"
-          disabled={loading}
+          disabled={loading || conectado}
         >
           {loading ? (
             <motion.span
@@ -83,20 +55,11 @@ const BotonConectar = ({ onClick, setCurrentPanel, onDisconnect, isConnected }) 
               Conectando...
             </motion.span>
           ) : conectado ? (
-            "Desconectar"
+            "Conectado"
           ) : (
             "Conectar"
           )}
         </motion.button>
-
-        {/* Modal de confirmación */}
-        <ConfirmModal
-          open={showModal}
-          title="Confirmar desconexión"
-          message={null}
-          onConfirm={confirmDisconnect}
-          onCancel={cancelDisconnect}
-        />
 
         {/* Botón de info */}
         <button
