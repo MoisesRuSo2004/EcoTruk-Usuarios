@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail } from "lucide-react";
+import { User, Mail, Camera } from "lucide-react";
 import {
   getPerfilUsuario,
   actualizarUsuario,
@@ -16,6 +16,7 @@ const InformacionPersonal = () => {
     const cargarPerfil = async () => {
       try {
         const perfil = await getPerfilUsuario();
+        console.log("👤 Perfil cargado:", perfil); // 👈 log aquí
         setUsuario(perfil);
         setFormData({
           nombre: perfil.nombre || "",
@@ -47,7 +48,12 @@ const InformacionPersonal = () => {
   };
 
   const handleGuardar = async () => {
-    if (guardando || !usuario?._id) return;
+    if (guardando || !(usuario?.id || usuario?._id)) {
+      console.warn("⏸ Guardado cancelado: ya está guardando o no hay usuario");
+      return;
+    }
+
+    console.log("▶ Iniciando guardado de cambios...");
     setGuardando(true);
     setMensaje("");
 
@@ -55,15 +61,24 @@ const InformacionPersonal = () => {
       const form = new FormData();
       form.append("nombre", formData.nombre);
       form.append("correo", formData.correo);
-      if (imagen) form.append("imagen", imagen);
+      if (imagen) {
+        console.log("📷 Imagen seleccionada:", imagen.name);
+        form.append("imagen", imagen);
+      }
 
-      const id = usuario._id?.$oid || usuario._id;
-      await actualizarUsuario(id, form, true);
+      // ✅ ahora soporta tanto id como _id
+      const id = usuario.id || usuario._id?.$oid || usuario._id;
+      console.log("🆔 ID del usuario a actualizar:", id);
+
+      const response = await actualizarUsuario(id, form);
+      console.log("✅ Respuesta del servidor:", response);
+
       setMensaje("✅ Cambios guardados correctamente");
     } catch (err) {
       console.error("❌ Error al actualizar usuario:", err);
       setMensaje("❌ No se pudieron guardar los cambios");
     } finally {
+      console.log("🏁 Finalizando guardado...");
       setGuardando(false);
     }
   };
@@ -73,96 +88,112 @@ const InformacionPersonal = () => {
   }
 
   return (
-    <div className="p-10 w-full">
-      <h1 className="text-3xl font-bold text-gray-900 mb-10">
+    <div className="p-6 md:p-10 w-full max-w-4xl mx-auto">
+      {/* Título */}
+      <h1 className="text-3xl font-semibold text-gray-900 mb-8">
         Información personal
       </h1>
 
-      {/* Avatar editable */}
-      <div className="flex items-center gap-6 mb-10">
-        <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-          {imagen ? (
-            <img
-              src={URL.createObjectURL(imagen)}
-              alt="preview"
-              className="w-full h-full object-cover rounded-full"
+      {/* Card principal */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+        {/* Avatar */}
+        <div className="flex flex-col sm:flex-row items-center gap-6 mb-10">
+          <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-md group cursor-pointer">
+            {imagen ? (
+              <img
+                src={URL.createObjectURL(imagen)}
+                alt="preview"
+                className="w-full h-full object-cover"
+              />
+            ) : usuario.fotoPerfil ? (
+              <img
+                src={usuario.fotoPerfil}
+                alt="avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <User className="w-12 h-12 text-gray-500" />
+              </div>
+            )}
+
+            {/* Hover icono */}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition grid place-items-center">
+              <Camera className="text-white w-7 h-7" />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm text-gray-600 block mb-1">
+              Cambiar foto de perfil
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImagenChange}
+              className="text-sm text-gray-700"
             />
-          ) : usuario.fotoPerfil ? (
-            <img
-              src={usuario.fotoPerfil}
-              alt="avatar"
-              className="w-full h-full object-cover rounded-full"
-            />
-          ) : (
-            <User className="w-12 h-12 text-gray-500" />
+          </div>
+        </div>
+
+        {/* Inputs */}
+        <div className="space-y-7">
+          {/* Nombre */}
+          <div>
+            <label className="text-sm text-gray-600">Nombre completo</label>
+            <div className="mt-1 flex items-center gap-3 bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 focus-within:border-green-600 transition">
+              <User className="w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleChange}
+                className="w-full bg-transparent outline-none text-gray-900"
+              />
+            </div>
+          </div>
+
+          {/* Correo */}
+          <div>
+            <label className="text-sm text-gray-600">Correo electrónico</label>
+            <div className="mt-1 flex items-center gap-3 bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 focus-within:border-green-600 transition">
+              <Mail className="w-5 h-5 text-gray-400" />
+              <input
+                type="email"
+                name="correo"
+                value={formData.correo}
+                onChange={handleChange}
+                className="w-full bg-transparent outline-none text-gray-900"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Guardar */}
+        <div className="mt-10">
+          <button
+            onClick={handleGuardar}
+            disabled={guardando}
+            className={`px-6 py-3 rounded-xl font-medium text-white shadow-md transition
+              ${
+                guardando
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-700 hover:bg-green-800"
+              }`}
+          >
+            {guardando ? "Guardando..." : "Guardar cambios"}
+          </button>
+
+          {mensaje && (
+            <p
+              className={`mt-3 text-sm ${
+                mensaje.startsWith("✅") ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {mensaje}
+            </p>
           )}
         </div>
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">
-            Cambiar foto de perfil
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImagenChange}
-            className="text-sm"
-          />
-        </div>
-      </div>
-
-      {/* Campos */}
-      <div className="space-y-6 text-gray-800">
-        <div className="border-b pb-4 flex justify-between items-center">
-          <div className="w-full">
-            <p className="text-sm text-gray-500">Nombre</p>
-            <input
-              type="text"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 border rounded-md text-gray-800"
-            />
-          </div>
-          <User className="text-gray-400 w-4 h-4" />
-        </div>
-
-        <div className="border-b pb-4 flex justify-between items-center">
-          <div className="w-full">
-            <p className="text-sm text-gray-500">Correo electrónico</p>
-            <input
-              type="email"
-              name="correo"
-              value={formData.correo}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 border rounded-md text-gray-800"
-            />
-          </div>
-          <Mail className="text-gray-400 w-4 h-4" />
-        </div>
-      </div>
-
-      {/* Botón guardar */}
-      <div className="mt-8">
-        <button
-          onClick={handleGuardar}
-          disabled={guardando}
-          className={`px-4 py-2 rounded transition ${
-            guardando
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-700 hover:bg-green-800 text-white"
-          }`}
-        >
-          {guardando ? "Guardando..." : "Guardar cambios"}
-        </button>
-        {mensaje && (
-          <p
-            className={`mt-2 text-sm ${
-              mensaje.startsWith("✅") ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {mensaje}
-          </p>
-        )}
       </div>
     </div>
   );

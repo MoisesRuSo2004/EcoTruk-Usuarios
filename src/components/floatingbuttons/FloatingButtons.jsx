@@ -5,17 +5,17 @@ import * as motion from "motion/react-client";
 const FloatingButtons = ({
   setCurrentPanel,
   onRecenter,
-  bottomSheetHeight,
   onToggleSidebar,
   onSimularUbicacion,
   onToggleZonas,
   mostrarZonas,
+  zonaActual, // 👈 número o string "Zona X"
+  totalZonas, // 👈 número total de zonas
 }) => {
   const handleConectar = () => {
     onSimularUbicacion();
   };
 
-  // 🎬 Configuración base de animación (más sutil)
   const baseAnim = {
     initial: { opacity: 0, scale: 0.9, y: 10 },
     animate: { opacity: 1, scale: 1, y: 0 },
@@ -26,7 +26,6 @@ const FloatingButtons = ({
     },
   };
 
-  // ⚡ Configuración de botones flotantes en cascada
   const botonesFlotantes = [
     {
       id: "avisos",
@@ -48,6 +47,11 @@ const FloatingButtons = ({
     },
   ];
 
+  // 🧭 Normalizar zonaActual: si viene como "Zona 1" → extraer número
+  const zonaDisplay = zonaActual
+    ? zonaActual.toString().replace("Zona ", "")
+    : "-";
+
   return (
     <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-20 font-inter">
       {/* 🟢 Botón de menú */}
@@ -61,27 +65,27 @@ const FloatingButtons = ({
 
       {/* 🧭 Indicador principal */}
       <div className="absolute top-[25px] left-1/2 transform -translate-x-1/2 z-30">
-        <div className="bg-surface w-[150px] h-[50px] px-4 py-1 rounded-full shadow-md flex items-center justify-center border border-primary/30">
-          <span className="text-[22px] font-semibold text-text">
-            <span className="text-text">1</span>
-            <span className="text-text-secondary mx-1">|</span>
-            <span className="text-primary">12</span>
+        <div className="bg-white w-[150px] h-[50px] px-4 py-1 rounded-full shadow-md flex items-center justify-center border border-green-300">
+          <span className="text-[22px] font-semibold text-gray-800">
+            <span className="text-green-700">{zonaDisplay}</span>
+            <span className="text-gray-400 mx-1">|</span>
+            <span className="text-green-700">{totalZonas || "-"}</span>
           </span>
         </div>
       </div>
 
-      {/* 🔢 Subcontador */}
+      {/* 🔢 Subcontador (puedes ajustarlo dinámicamente más adelante) */}
       <div className="absolute top-[85px] left-1/2 transform -translate-x-1/2 z-30">
-        <div className="bg-surface w-[70px] h-[35px] px-4 py-1 rounded-full shadow-sm flex items-center justify-center border border-primary/20">
-          <span className="text-[16px] font-semibold text-text">
+        <div className="bg-white w-[70px] h-[35px] px-4 py-1 rounded-full shadow-sm flex items-center justify-center border border-green-200">
+          <span className="text-[16px] font-semibold text-gray-800">
             <span>0</span>
-            <span className="text-text-secondary mx-1">|</span>
-            <span className="text-primary">0</span>
+            <span className="text-gray-400 mx-1">|</span>
+            <span className="text-green-700">0</span>
           </span>
         </div>
       </div>
 
-      {/* 🎯 Botones flotantes (derecha, con cascada) */}
+      {/* 🎯 Botones flotantes */}
       <div className="fixed right-4 bottom-44 flex flex-col gap-5 pointer-events-auto z-40">
         {botonesFlotantes.map((btn, i) => (
           <motion.button
@@ -89,13 +93,13 @@ const FloatingButtons = ({
             {...baseAnim}
             transition={{
               ...baseAnim.transition,
-              delay: 0.15 + i * 0.1, // ⏱️ Cascada sutil
+              delay: 0.15 + i * 0.1,
             }}
             className={`w-[55px] h-[55px] rounded-full ${
               btn.id === "zonas" && mostrarZonas
                 ? "bg-[#e6e7e8]"
                 : "bg-[#f5f6f7]"
-            } text-white flex items-center justify-center shadow-lg ${
+            } flex items-center justify-center shadow-lg ${
               btn.color
             } transition`}
             onClick={btn.onClick}
@@ -105,8 +109,6 @@ const FloatingButtons = ({
           </motion.button>
         ))}
       </div>
-
-      {/* 🟢 Botón principal (Conectar) */}
     </div>
   );
 };

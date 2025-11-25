@@ -5,11 +5,11 @@ import { FcAdvertising } from "react-icons/fc";
 
 const InfoPanel = ({ info }) => {
   const mensajes = [
-    "Activa tu ubicación para ver los camiones de recolección en tu zona.",
-    "🌱 Tip: Coloca la basura orgánica en bolsas biodegradables.",
+    "📍 Activa tu ubicación para ver los camiones de recolección en tu zona.",
+    "🌱 Tip: Usa bolsas biodegradables para la basura orgánica.",
     "🗓️ Horario de recolección: Lunes a sábado, 6:00 a.m. - 8:00 p.m.",
-    "⚠️ Hoy no habrá recolección en la zona norte de Cartagena",
-    "📰 Más info sobre reciclaje: Gobierno local",
+    "⚠️ Hoy no habrá recolección en la zona norte de Cartagena.",
+    "📰 Más info sobre reciclaje: Gobierno local.",
   ];
 
   const [index, setIndex] = useState(0);
@@ -17,21 +17,20 @@ const InfoPanel = ({ info }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % mensajes.length);
-    }, 3000); // Cambia de mensaje cada 3 segundos
+    }, 4000); // cambia cada 4 segundos para mejor lectura
     return () => clearInterval(interval);
   }, []);
 
-  // Noticias y tips estáticos de Cartagena
   const noticias = [
     {
-      texto: " Más info sobre reciclaje en Cartagena.",
+      texto: "Más info sobre reciclaje en Cartagena.",
       enlace: "https://www.pacaribe.com/pacaribe-le-cumple-a-cartagena/",
       imagen:
         "https://www.pacaribe.com/wp-content/uploads/2024/11/Foto1-1024x682.jpeg",
     },
     {
       texto:
-        " Pacaribe recolectó más de 150 mil toneladas de residuos en el primer semestre de 2025.",
+        "Pacaribe recolectó más de 150 mil toneladas de residuos en el primer semestre de 2025.",
       enlace:
         "https://www.pacaribe.com/entre-enero-y-junio-de-2025-recolectamos-mas-de-150-mil-toneladas-de-residuos-en-cartagena-fortaleciendo-nuestro-servicio-con-tecnologia-limpia-y-trabajo-comunitario/",
       imagen:
@@ -39,28 +38,25 @@ const InfoPanel = ({ info }) => {
     },
     {
       texto:
-        " Pacaribe se articula con EPA Cartagena y el Distrito para modernizar la poda y el cuidado de los árboles.",
+        "Pacaribe se articula con EPA Cartagena y el Distrito para modernizar la poda y el cuidado de los árboles.",
       enlace: "https://www.pacaribe.com/sala-de-prensa/",
       imagen:
         "https://www.pacaribe.com/wp-content/uploads/2025/08/FOTO-1-1024x682.jpeg",
     },
   ];
 
+  // Estado desconectado
   if (!info) {
     return (
-      <div className="text-surface-dark space-y-4 p-2 pt-0">
-        {/* Estado desconectado */}
-        <div className="flex justify-center">
-          <p className="text-3xl font-semibold flex items-center gap-2">
-            <div className="text-red-600">
-              <Unplug size={35} />
-            </div>
-            Estás <strong>desconectado</strong>
-          </p>
+      <div className="text-gray-800 space-y-6 p-4">
+        {/* Estado */}
+        <div className="flex justify-center items-center gap-2">
+          <Unplug size={35} className="text-red-600" />
+          <p className="text-2xl font-bold">Estás desconectado</p>
         </div>
 
-        {/* Mensaje animado tipo carrusel */}
-        <div className="h-8">
+        {/* Mensaje animado */}
+        <div className="h-10 flex justify-center items-center">
           <AnimatePresence mode="wait">
             <motion.p
               key={index}
@@ -68,44 +64,48 @@ const InfoPanel = ({ info }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.8 }}
-              className="text-surface-light text-xl"
+              className="text-lg text-gray-600 font-medium text-center"
             >
               {mensajes[index]}
             </motion.p>
           </AnimatePresence>
         </div>
 
-        {/* Noticias en cards pequeñas, horizontales */}
-        <div className="flex space-x-3 overflow-x-auto mt-4 pb-2">
-          {noticias.map((item, index) => (
+        {/* Noticias */}
+        <div className="flex space-x-4 overflow-x-auto mt-4 pb-2">
+          {noticias.map((item, idx) => (
             <div
-              key={index}
-              className="flex-shrink-0 w-60 border border-surface-light rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow bg-[#e6e7e8]"
+              key={idx}
+              className="flex-shrink-0 w-64 bg-white border border-gray-200 rounded-xl shadow hover:shadow-lg transition-shadow"
             >
               {item.imagen && (
                 <img
                   src={item.imagen}
                   alt="noticia"
-                  className="w-full h-28 object-cover rounded-md mb-2"
+                  className="w-full h-32 object-cover rounded-t-xl"
                 />
               )}
-              {item.enlace ? (
-                <a
-                  href={item.enlace}
-                  target="_blank"
-                  className="underline hover:text-green-900 text-surface-light text-sm"
-                >
-                  {item.texto}
-                </a>
-              ) : (
-                <p className="text-surface-light text-sm">{item.texto}</p>
-              )}
+              <div className="p-3">
+                {item.enlace ? (
+                  <a
+                    href={item.enlace}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-green-700 hover:underline font-medium"
+                  >
+                    {item.texto}
+                  </a>
+                ) : (
+                  <p className="text-sm text-gray-700">{item.texto}</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="border-t border-surface-light pt-3 text-sm space-y-1">
-          <p className="italic text-surface-light">
+        {/* Frase motivacional */}
+        <div className="border-t border-gray-300 pt-3 text-center">
+          <p className="italic text-gray-600 text-sm">
             🌱 “Reciclar es cuidar el planeta y tu comunidad”
           </p>
         </div>
@@ -113,30 +113,33 @@ const InfoPanel = ({ info }) => {
     );
   }
 
+  // Estado conectado
   return (
-    <div className="text-surface-dark space-y-2">
-      <p>
-        <strong className="text-primary-dark">Ubicación simulada:</strong>{" "}
-        {info.ubicacion.lat.toFixed(4)}, {info.ubicacion.lng.toFixed(4)}
-      </p>
-      <p>
-        <strong className="text-primary-dark">Zona asignada:</strong>{" "}
-        {info.zona}
-      </p>
-      <p>
-        <strong className="text-primary-dark">Camión asignado:</strong>
-      </p>
-      <ul className="list-disc list-inside ml-4 text-surface-dark">
-        <li>
-          <strong>Nombre:</strong> {info.camion?.nombre || "Sin nombre"}
-        </li>
-        <li>
-          <strong>Estado:</strong> {info.camion?.estado || "Desconocido"}
-        </li>
-        <li>
-          <strong>Placa:</strong> {info.camion?.placa || "Sin placa"}
-        </li>
-      </ul>
+    <div className="text-gray-800 space-y-4 p-4">
+      {/* Ubicación */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
+        <p className="text-sm text-gray-500">Ubicación simulada</p>
+        <p className="text-lg font-semibold text-green-700">
+          {info.ubicacion.lat.toFixed(4)}, {info.ubicacion.lng.toFixed(4)}
+        </p>
+      </div>
+
+      {/* Zona */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
+        <p className="text-sm text-gray-500">Zona asignada</p>
+        <p className="text-lg font-semibold text-green-700">{info.zona}</p>
+      </div>
+
+      {/* Camión asignado */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3">
+        <p className="text-sm text-gray-500 mb-2">Camión asignado</p>
+        <div className="space-y-1">
+          <p>
+            <span className="font-medium text-gray-700">Placa:</span>{" "}
+            {info.camion?.placa || "Sin placa"}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

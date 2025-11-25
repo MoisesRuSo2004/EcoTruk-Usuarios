@@ -16,11 +16,9 @@ const getAuthHeaders = () => {
  */
 const parseAxiosError = (error) => {
   if (axios.isCancel(error)) {
-    // petición cancelada
     return { message: "Petición cancelada", isCancelled: true };
   }
   if (error.response) {
-    // El servidor respondió con un status fuera de 2xx
     return {
       message:
         error.response.data?.message ||
@@ -30,30 +28,26 @@ const parseAxiosError = (error) => {
       data: error.response.data,
     };
   } else if (error.request) {
-    // La petición fue hecha pero no hubo respuesta
     return { message: "No se recibió respuesta del servidor", request: true };
   } else {
-    // Otro error
     return { message: error.message || "Error desconocido" };
   }
 };
 
 /**
  * Obtener perfil del usuario autenticado
- * opcional: pasar un cancelToken si quieres cancelar la petición al desmontar
  */
 export const getPerfilUsuario = async (cancelToken) => {
   try {
     const response = await api.get("/usuarios/perfil", {
       headers: getAuthHeaders(),
-      timeout: 10000, // 10s
+      timeout: 10000,
       cancelToken,
     });
     return response.data;
   } catch (error) {
     const parsed = parseAxiosError(error);
     console.error("❌ Error al obtener perfil:", parsed);
-    // lanzamos un error estandar para que el componente lo maneje
     const err = new Error(parsed.message);
     err.meta = parsed;
     throw err;
@@ -61,20 +55,24 @@ export const getPerfilUsuario = async (cancelToken) => {
 };
 
 /**
- * Actualizar perfil del usuario
+ * Actualizar perfil del usuario (PATCH)
  * datosActualizados puede ser FormData (subida de avatar) o JSON
  */
 export const actualizarUsuario = async (id, datosActualizados, cancelToken) => {
   const esFormData = datosActualizados instanceof FormData;
   try {
-    const response = await api.put(`/usuarios/${id}/perfil`, datosActualizados, {
-      headers: {
-        ...getAuthHeaders(),
-        ...(esFormData ? { "Content-Type": "multipart/form-data" } : {}),
-      },
-      timeout: 15000,
-      cancelToken,
-    });
+    const response = await api.patch(
+      `/usuarios/${id}/perfil`, // 👈 ahora PATCH
+      datosActualizados,
+      {
+        headers: {
+          ...getAuthHeaders(),
+          ...(esFormData ? { "Content-Type": "multipart/form-data" } : {}),
+        },
+        timeout: 15000,
+        cancelToken,
+      }
+    );
     return response.data;
   } catch (error) {
     const parsed = parseAxiosError(error);

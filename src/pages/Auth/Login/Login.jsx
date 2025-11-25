@@ -32,10 +32,13 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
-        correo: email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        {
+          correo: email,
+          password,
+        }
+      );
 
       const { token, rol } = response.data || {};
       if (!token || !rol) {
@@ -55,30 +58,28 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen w-full flex bg-white font-inter overflow-hidden">
-
-      {/* Imagen izquierda */}
-      <div className="hidden lg:flex w-1/2 bg-[#E6FFF2] justify-center items-center px-4">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#F7F8FA] font-inter">
+      {/* Imagen izquierda (solo en desktop) */}
+      <div className="hidden lg:flex w-1/2 justify-center items-center bg-white border-r border-gray-200">
         <img
           src="/img/register.png"
-          alt="Decoración EcoTruck"
-          className="w-[62%] max-w-[380px] object-contain drop-shadow-md"
+          alt="EcoTruck login visual"
+          className="w-[65%] max-w-[420px] object-contain drop-shadow-lg"
         />
       </div>
 
-      {/* Formulario derecha (más pequeño aún) */}
-      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-4">
-        <div className="w-full max-w-[350px] sm:max-w-[320px] bg-white rounded-lg p-5 border border-gray-200 shadow-[0_6px_18px_rgba(0,0,0,0.05)] flex flex-col items-center">
-
-          {/* Logo más pequeño */}
+      {/* Sección del formulario - ocupa toda la pantalla en móvil */}
+      <div className="w-full lg:w-1/2 flex justify-center items-center px-6 py-10">
+        <div className="w-full max-w-[400px] flex flex-col">
+          {/* Logo */}
           <img
             src="/logos/LogoEcoTruck.svg"
             alt="EcoTruck"
-            className="w-20 sm:w-24 mb-3"
+            className="w-24 mx-auto mb-6"
           />
 
-          {/* Mensaje animado más compacto */}
-          <p className="text-center text-[#256F54] text-[12px] sm:text-[13.5px] font-medium leading-tight mb-4 min-h-[32px] max-w-[230px]">
+          {/* Mensaje animado */}
+          <p className="text-center text-gray-600 text-sm font-medium mb-4 min-h-[32px]">
             <LoginMessage mensajes={mensajes} index={index} />
           </p>
 
@@ -94,18 +95,18 @@ const Login = () => {
             error={error}
           />
 
-          {/* Separador */}
-          <div className="flex items-center gap-2 my-3 w-full">
+          {/* Línea separadora */}
+          <div className="flex items-center gap-2 my-5">
             <div className="flex-grow h-px bg-gray-300" />
-            <span className="text-gray-500 text-[11px] font-medium">o</span>
+            <span className="text-gray-500 text-xs">o</span>
             <div className="flex-grow h-px bg-gray-300" />
           </div>
 
           {/* OAuth Buttons */}
           <LoginOAuthButtons />
 
-          {/* Política */}
-          <p className="text-[9.5px] text-gray-500 mt-3 text-center leading-tight">
+          {/* Footer */}
+          <p className="text-[10px] text-gray-500 mt-4 text-center leading-tight">
             Al continuar, aceptas nuestras políticas y términos de uso.
           </p>
         </div>

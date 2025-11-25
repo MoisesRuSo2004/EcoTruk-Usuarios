@@ -18,8 +18,12 @@ const MapView = ({
   const mapInstance = useRef(null);
   const markersRef = useRef([]);
   const overlaysRef = useRef([]);
+  const directionsServiceRef = useRef(null);
+  const directionsRendererRef = useRef(null);
   const [mapReady, setMapReady] = useState(false);
   const [rutasActivas, setRutasActivas] = useState([]);
+  const [infoRuta, setInfoRuta] = useState({ distancia: "", tiempo: "" });
+  const [camionesActivos, setCamionesActivos] = useState([]);
 
   // 🗺️ Inicializa el mapa
   useEffect(() => {
@@ -60,6 +64,17 @@ const MapView = ({
       mapInstance.current = map;
       setMapInstance(map);
       setMapReady(true);
+
+      directionsServiceRef.current = new google.maps.DirectionsService();
+      directionsRendererRef.current = new google.maps.DirectionsRenderer({
+        suppressMarkers: true, // 👈 elimina íconos automáticos
+        polylineOptions: {
+          strokeColor: "#007BFF", // azul elegante
+          strokeOpacity: 0.8,
+          strokeWeight: 5,
+        },
+      });
+      directionsRendererRef.current.setMap(map);
     });
   }, []);
 
@@ -204,11 +219,68 @@ const MapView = ({
     });
   };
 
+  // 🛣️ Trazar ruta entre camión y usuario
+  const trazarRuta = (origen, destino) => {
+    if (
+      !origen ||
+      !destino ||
+      !directionsServiceRef.current ||
+      !directionsRendererRef.current
+    )
+      return;
+
+    directionsServiceRef.current.route(
+      {
+        origin: origen,
+        destination: destino,
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === "OK") {
+          directionsRendererRef.current.setDirections(result);
+          const leg = result.routes[0].legs[0];
+          setInfoRuta({
+            distancia: leg.distance.text,
+            tiempo: leg.duration.text,
+          });
+          console.log("🛣️ Distancia:", leg.distance.text);
+          console.log("⏱️ Tiempo estimado:", leg.duration.text);
+        } else {
+          console.error("❌ Error al calcular ruta:", status);
+        }
+      }
+    );
+  };
+
+  // 🔁 Actualiza ruta entre camión y usuario
+  useEffect(() => {
+    const ubicacionCamion = camionesActivos[0]?.ubicacionActual;
+
+    const ubicacionValida =
+      ubicacionCamion &&
+      typeof ubicacionCamion.lat === "number" &&
+      typeof ubicacionCamion.lng === "number";
+
+    if (!ubicacionSimulada || !ubicacionValida || !mapInstance.current) {
+      // 🧹 Limpiar ruta si no hay ubicación válida
+      if (directionsRendererRef.current) {
+        directionsRendererRef.current.setDirections({ routes: [] });
+      }
+      setInfoRuta({ distancia: "", tiempo: "" });
+      return;
+    }
+
+    trazarRuta(ubicacionCamion, ubicacionSimulada);
+  }, [ubicacionSimulada, camionesActivos]);
+
   // 🔄 Actualiza camiones cada 3 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       getRutasVisualizacion()
-        .then((camiones) => renderizarCamiones(camiones))
+        .then((camiones) => {
+          setCamionesActivos(camiones);
+          renderizarCamiones(camiones);
+        })
         .catch((err) => console.error("❌ Error al obtener rutas:", err));
     }, 3000);
 
@@ -224,8 +296,15 @@ const MapView = ({
       {mapReady && mostrarZonas && (
         <ZonasDelimitadas map={mapInstance.current} visible={mostrarZonas} />
       )}
+
+      {infoRuta.distancia && infoRuta.tiempo && (
+        <div className="absolute top-2/3 left-4 transform -translate-y-1/2 bg-white shadow-lg px-6 py-4 rounded-lg z-[9999] text-gray-800 text-sm font-medium">
+          🚛 Camión a{" "}
+          <span className="text-blue-600">{infoRuta.distancia}</span> — llega en{" "}
+          <span className="text-green-600">{infoRuta.tiempo}</span>
+        </div>
+      )}
     </div>
   );
 };
-
 export default MapView;

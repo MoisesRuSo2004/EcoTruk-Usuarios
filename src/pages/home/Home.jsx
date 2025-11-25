@@ -10,18 +10,19 @@ import NotificacionesModal from "../../components/modal/NotificacionesModal";
 import { useSimulacionUbicacion } from "../../hooks/useSimulacionUbicacion";
 import BotonConectar from "../../components/floatingbuttons/BotonConectar";
 import ModalEcoTruck from "../../components/modal/ModalEcoTruck";
+import AlertaProximidad from "../../components/AlertaProximidad";
 
 const Home = () => {
   const [currentPanel, setCurrentPanel] = useState("info");
   const [bottomSheetHeight, setBottomSheetHeight] = useState(80);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [ubicacionCamion, setUbicacionCamion] = useState(null);
   const [camionesActivos, setCamionesActivos] = useState([]);
   const { info, simularConexion } = useSimulacionUbicacion();
   const [mostrarModalUbicacion, setMostrarModalUbicacion] = useState(false);
   const [ubicacionReal, setUbicacionReal] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
+  const ubicacionUsuario = info?.ubicacion; // 👈 fuerza simulación
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -181,9 +182,14 @@ const Home = () => {
         onToggleZonas={toggleZonas}
         mostrarZonas={mostrarZonas} // ✅ esta línea es clave
         onRecenter={recenterMapa}
+        zonaActual={info?.zona} // 👈 usa el mismo campo que ya muestras en InfoPanel
+        totalZonas={12}
       />
 
-      <BotonConectar onClick={handleConectar} />
+      <BotonConectar
+        onClick={handleConectar}
+        setCurrentPanel={setCurrentPanel} // 👈 aquí
+      />
 
       <div
         className="absolute bottom-0 left-0 w-full bg-gray-800 rounded-t-2xl shadow-xl z-50 transition-all"
@@ -192,7 +198,7 @@ const Home = () => {
         <BottomSheet
           currentPanel={currentPanel}
           onHeightChange={setBottomSheetHeight}
-          infoSimulada={info} // 👈 pasa la info simulada al panel
+          infoSimulada={info}
         />
       </div>
       <ModalEcoTruck
@@ -204,6 +210,10 @@ const Home = () => {
 
       <CalendarioModal />
       <NotificacionesModal />
+      <AlertaProximidad
+        ubicacionCamion={camionesActivos[0]?.ubicacionActual} // o el camión asignado
+        ubicacionUsuario={ubicacionReal || info?.ubicacion}
+      />
     </div>
   );
 };
