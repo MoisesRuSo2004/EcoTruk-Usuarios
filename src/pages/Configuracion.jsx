@@ -1,161 +1,120 @@
 import { useState } from "react";
-import { Bell, User, Moon, Globe, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Bell,
+  User,
+  Moon,
+  Globe,
+  Shield,
+  ArrowLeft,
+} from "lucide-react";
 
 export default function Configuracion() {
   const [modoOscuro, setModoOscuro] = useState(false);
   const [notificaciones, setNotificaciones] = useState(true);
   const [idioma, setIdioma] = useState("es");
+  const navigate = useNavigate();
 
   return (
     <div
       className={`min-h-screen transition-colors duration-300 ${
-        modoOscuro ? "bg-[#0e1a14] text-[#eaf4eb]" : "bg-[#f4fdf6] text-[#1b4332]"
+        modoOscuro
+          ? "bg-[#0e1a14] text-[#eaf4eb]"
+          : "bg-[#f4fdf6] text-[#1b4332]"
       }`}
     >
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+
+        {/* Botón volver */}
+              <button
+        onClick={() => navigate(-1)}
+        className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all shadow-sm hover:shadow-md ${
+          modoOscuro
+            ? "border-[#2d6a4f] bg-[#1b4332]/60 hover:bg-[#1b4332]"
+            : "border-[#b7efc5] bg-white hover:bg-[#e9f8ee]"
+        }`}
+      >
+        <ArrowLeft size={20} className="text-[#40916c]" />
+      </button>
+
+        {/* Título */}  
         <h1
-          className={`text-3xl font-bold text-center mb-10 ${
+          className={`text-4xl font-extrabold text-center drop-shadow-sm ${
             modoOscuro ? "text-[#b7efc5]" : "text-[#2d6a4f]"
           }`}
         >
           ⚙️ Configuración
         </h1>
 
+        {/* Tarjetas */}
         <div className="grid gap-6 sm:grid-cols-2">
+          
           {/* Perfil */}
-          <div
-            className={`rounded-2xl p-6 shadow-lg transition-all ${
-              modoOscuro
-                ? "bg-[#1b4332]/60 hover:bg-[#1b4332]/80"
-                : "bg-white hover:bg-[#e9f8ee]"
-            }`}
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <User className="text-[#52b788]" size={30} />
-              <h2
-                className={`text-lg font-semibold ${
-                  modoOscuro ? "text-[#d8f3dc]" : "text-[#1b4332]"
-                }`}
-              >
-                Perfil
-              </h2>
-            </div>
-            <p
-              className={`text-sm mb-4 ${
-                modoOscuro ? "text-[#b7efc5]" : "text-[#2d6a4f]/70"
-              }`}
-            >
-              Consulta y actualiza tu información personal.
-            </p>
-            <button className="bg-[#40916c] hover:bg-[#2d6a4f] text-white px-4 py-2 rounded-xl text-sm transition-all">
-              Editar perfil
-            </button>
-          </div>
+          <Card
+            modoOscuro={modoOscuro}
+            icon={<User className="text-[#52b788]" size={30} />}
+            title="Perfil"
+            description="Consulta y actualiza tu información personal."
+            content={
+              <button className="bg-[#40916c] hover:bg-[#2d6a4f] text-white px-4 py-2 rounded-xl text-sm transition-all">
+                Editar perfil
+              </button>
+            }
+          />
 
           {/* Notificaciones */}
-          <div
-            className={`rounded-2xl p-6 shadow-lg transition-all ${
-              modoOscuro
-                ? "bg-[#1b4332]/60 hover:bg-[#1b4332]/80"
-                : "bg-white hover:bg-[#e9f8ee]"
-            }`}
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <Bell className="text-[#52b788]" size={30} />
-              <h2
-                className={`text-lg font-semibold ${
-                  modoOscuro ? "text-[#d8f3dc]" : "text-[#1b4332]"
+          <Card
+            modoOscuro={modoOscuro}
+            icon={<Bell className="text-[#52b788]" size={30} />}
+            title="Notificaciones"
+            description="Recibe alertas sobre recolecciones y novedades."
+            content={
+              <button
+                onClick={() => setNotificaciones(!notificaciones)}
+                className={`w-full py-2 rounded-xl text-sm font-medium transition-all ${
+                  notificaciones
+                    ? "bg-[#40916c] text-white hover:bg-[#2d6a4f]"
+                    : "bg-gray-300 hover:bg-gray-400 text-gray-800"
                 }`}
               >
-                Notificaciones
-              </h2>
-            </div>
-            <p
-              className={`text-sm mb-4 ${
-                modoOscuro ? "text-[#b7efc5]" : "text-[#2d6a4f]/70"
-              }`}
-            >
-              Recibe alertas sobre recolecciones y novedades.
-            </p>
-            <button
-              onClick={() => setNotificaciones(!notificaciones)}
-              className={`w-full py-2 rounded-xl text-sm font-medium transition-all ${
-                notificaciones
-                  ? "bg-[#40916c] text-white hover:bg-[#2d6a4f]"
-                  : "bg-gray-300 hover:bg-gray-400 text-gray-800"
-              }`}
-            >
-              {notificaciones ? "Activadas" : "Desactivadas"}
-            </button>
-          </div>
+                {notificaciones ? "Activadas" : "Desactivadas"}
+              </button>
+            }
+          />
 
           {/* Modo visual */}
-          <div
-            className={`rounded-2xl p-6 shadow-lg transition-all ${
-              modoOscuro
-                ? "bg-[#1b4332]/60 hover:bg-[#1b4332]/80"
-                : "bg-white hover:bg-[#e9f8ee]"
-            }`}
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <Moon className="text-[#52b788]" size={30} />
-              <h2
-                className={`text-lg font-semibold ${
-                  modoOscuro ? "text-[#d8f3dc]" : "text-[#1b4332]"
-                }`}
+          <Card
+            modoOscuro={modoOscuro}
+            icon={<Moon className="text-[#52b788]" size={30} />}
+            title="Modo visual"
+            description="Cambia entre modo claro u oscuro."
+            content={
+              <button
+                onClick={() => setModoOscuro(!modoOscuro)}
+                className="w-full py-2 rounded-xl bg-[#40916c] text-white hover:bg-[#2d6a4f] text-sm font-medium transition-all"
               >
-                Modo visual
-              </h2>
-            </div>
-            <p
-              className={`text-sm mb-4 ${
-                modoOscuro ? "text-[#b7efc5]" : "text-[#2d6a4f]/70"
-              }`}
-            >
-              Cambia entre modo claro u oscuro.
-            </p>
-            <button
-              onClick={() => setModoOscuro(!modoOscuro)}
-              className="w-full py-2 rounded-xl bg-[#40916c] text-white hover:bg-[#2d6a4f] text-sm font-medium transition-all"
-            >
-              {modoOscuro ? "Modo Oscuro" : "Modo Claro"}
-            </button>
-          </div>
+                {modoOscuro ? "Modo Oscuro" : "Modo Claro"}
+              </button>
+            }
+          />
 
           {/* Idioma */}
-          <div
-            className={`rounded-2xl p-6 shadow-lg transition-all ${
-              modoOscuro
-                ? "bg-[#1b4332]/60 hover:bg-[#1b4332]/80"
-                : "bg-white hover:bg-[#e9f8ee]"
-            }`}
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <Globe className="text-[#52b788]" size={30} />
-              <h2
-                className={`text-lg font-semibold ${
-                  modoOscuro ? "text-[#d8f3dc]" : "text-[#1b4332]"
-                }`}
+          <Card
+            modoOscuro={modoOscuro}
+            icon={<Globe className="text-[#52b788]" size={30} />}
+            title="Idioma"
+            description="Selecciona el idioma de la aplicación."
+            content={
+              <select
+                value={idioma}
+                onChange={(e) => setIdioma(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-transparent rounded-xl px-3 py-2 text-sm"
               >
-                Idioma
-              </h2>
-            </div>
-            <p
-              className={`text-sm mb-4 ${
-                modoOscuro ? "text-[#b7efc5]" : "text-[#2d6a4f]/70"
-              }`}
-            >
-              Selecciona el idioma de la aplicación.
-            </p>
-            <select
-              value={idioma}
-              onChange={(e) => setIdioma(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 bg-transparent rounded-xl px-3 py-2 text-sm"
-            >
-              <option value="es">Español</option>
-              <option value="en">Inglés</option>
-            </select>
-          </div>
+                <option value="es">Español</option>
+                <option value="en">Inglés</option>
+              </select>
+            }
+          />
 
           {/* Privacidad */}
           <div
@@ -197,6 +156,40 @@ export default function Configuracion() {
           © {new Date().getFullYear()} EcoTruk — Todos los derechos reservados
         </p>
       </div>
+    </div>
+  );
+}
+
+/* 
+  Componente reutilizable para tarjetas
+*/
+function Card({ modoOscuro, icon, title, description, content }) {
+  return (
+    <div
+      className={`rounded-2xl p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl ${
+        modoOscuro
+          ? "bg-[#1b4332]/60 hover:bg-[#1b4332]/80"
+          : "bg-white hover:bg-[#e9f8ee]"
+      }`}
+    >
+      <div className="flex items-center gap-4 mb-3">
+        {icon}
+        <h2
+          className={`text-lg font-semibold ${
+            modoOscuro ? "text-[#d8f3dc]" : "text-[#1b4332]"
+          }`}
+        >
+          {title}
+        </h2>
+      </div>
+      <p
+        className={`text-sm mb-4 ${
+          modoOscuro ? "text-[#b7efc5]" : "text-[#2d6a4f]/70"
+        }`}
+      >
+        {description}
+      </p>
+      {content}
     </div>
   );
 }

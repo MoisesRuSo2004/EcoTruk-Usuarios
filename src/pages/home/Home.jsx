@@ -18,7 +18,7 @@ const Home = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [camionesActivos, setCamionesActivos] = useState([]);
-  const { info, simularConexion } = useSimulacionUbicacion();
+  const { info, simularConexion, validarYSetUbicacion, desconectar } = useSimulacionUbicacion();
   const [mostrarModalUbicacion, setMostrarModalUbicacion] = useState(false);
   const [ubicacionReal, setUbicacionReal] = useState(null);
   const [mapInstance, setMapInstance] = useState(null);
@@ -43,6 +43,13 @@ const Home = () => {
     setMostrarModalUbicacion(true);
   };
 
+  const handleDisconnect = () => {
+    // limpiar ubicaciones locales
+    setUbicacionReal(null);
+    // limpiar simulación
+    if (typeof desconectar === "function") desconectar();
+  };
+
   const usarSimulacion = () => {
     simularConexion(); // ya lo tienes
     setCurrentPanel("info");
@@ -50,11 +57,18 @@ const Home = () => {
 
   const usarUbicacionReal = () => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const { latitude, longitude } = pos.coords;
-        const ubicacion = { lat: latitude, lng: longitude };
-        setUbicacionReal(ubicacion); // ✅ guarda ubicación
-        setCurrentPanel("info");
+        // la ubicación del navegador puede no ser precisa; validamos
+        const { ok } = await validarYSetUbicacion(latitude, longitude);
+        if (ok) {
+          // guardamos una versión suavizada/menos precisa para mostrar al usuario
+          const ubicacion = { lat: Number(latitude.toFixed(6)), lng: Number(longitude.toFixed(6)) };
+          setUbicacionReal(ubicacion);
+          setCurrentPanel("info");
+        } else {
+          alert("No fue posible validar tu ubicación. Intenta de nuevo o usa la simulación.");
+        }
       },
       (err) => {
         console.error("❌ Error al obtener ubicación:", err);
@@ -189,6 +203,8 @@ const Home = () => {
       <BotonConectar
         onClick={handleConectar}
         setCurrentPanel={setCurrentPanel} // 👈 aquí
+        onDisconnect={handleDisconnect}
+        isConnected={!!info}
       />
 
       <div

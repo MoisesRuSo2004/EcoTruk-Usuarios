@@ -48,10 +48,10 @@ const InfoPanel = ({ info }) => {
   // Estado desconectado
   if (!info) {
     return (
-      <div className="text-gray-800 space-y-6 p-4">
+      <div className="text-gray-800 space-y-6 -p-0">
         {/* Estado */}
         <div className="flex justify-center items-center gap-2">
-          <Unplug size={35} className="text-red-600" />
+          <Unplug size={40} className="text-red-600" />
           <p className="text-2xl font-bold">Estás desconectado</p>
         </div>
 
