@@ -74,6 +74,16 @@ const FloatingButtons = ({
         </div>
       </div>
 
+      {/* 🔢 Subcontador (puedes ajustarlo dinámicamente más adelante) */}
+      <div className="absolute top-[85px] left-1/2 transform -translate-x-1/2 z-30">
+        <div className="bg-white w-[70px] h-[35px] px-4 py-1 rounded-full shadow-sm flex items-center justify-center border border-green-200">
+          <span className="text-[16px] font-semibold text-gray-800">
+            <span>0</span>
+            <span className="text-gray-400 mx-1">|</span>
+            <span className="text-green-700">0</span>
+          </span>
+        </div>
+      </div>
 
       {/* 🎯 Botones flotantes */}
       <div className="fixed right-4 bottom-44 flex flex-col gap-5 pointer-events-auto z-40">
