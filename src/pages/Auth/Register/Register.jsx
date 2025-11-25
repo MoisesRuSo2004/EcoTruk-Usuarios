@@ -34,7 +34,7 @@ export default function RegistroEcoTruck() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/usuarios/registrar",
+        "https://ecotruck-dkfvh6e5brhqc6h5.brazilsouth-01.azurewebsites.net/api/usuarios/registrar",
         {
           nombre,
           correo,
