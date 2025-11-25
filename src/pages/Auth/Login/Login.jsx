@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import LoginMessage from "../../../components/login/LoginMessage";
-import LoginForm from "../../../components/login/LoginForm";
-import LoginOAuthButtons from "../../../components/login/LoginOAuthButtons";
 import axios from "axios";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,10 +13,10 @@ const Login = () => {
   const navigate = useNavigate();
 
   const mensajes = [
-    "Inicia sesión para continuar con EcoTruck",
-    "Tu cuenta EcoTruck te espera",
-    "Únete al cambio ecológico",
-    "Conecta con tu cuenta y sigamos moviendo la ciudad limpia",
+    "Inicia sesión para continuar con EcoTruck, Tu ciudad te necesita. Entra y súmate al movimiento",
+    "Tu cuenta EcoTruck Gestiona, mejora y transforma: accede ahora espera",
+    "Únete al cambio ¡Hagamos una Cartagena más limpia juntos!",
+    "Conecta y movamos la EcoTruck no se detiene. Tú tampoco. limpia",
   ];
 
   useEffect(() => {
@@ -58,54 +57,73 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#F7F8FA] font-inter">
-      {/* Imagen izquierda (solo en desktop) */}
-      <div className="hidden lg:flex w-1/2 justify-center items-center bg-white border-r border-gray-200">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#F4F6F9] font-inter">
+      {/* Imagen izquierda (solo desktop) */}
+      <div className="hidden lg:flex w-1/2 justify-center items-center bg-white border-r border-gray-200 p-6">
         <img
           src="/img/register.png"
-          alt="EcoTruck login visual"
-          className="w-[65%] max-w-[420px] object-contain drop-shadow-lg"
+          alt="EcoTruck"
+          className="w-[60%] max-w-[420px] object-contain drop-shadow-lg"
         />
       </div>
 
-      {/* Sección del formulario - ocupa toda la pantalla en móvil */}
+      {/* Sección derecha */}
       <div className="w-full lg:w-1/2 flex justify-center items-center px-6 py-10">
-        <div className="w-full max-w-[400px] flex flex-col">
+        <div className="w-full max-w-[400px] bg-white p-8 shadow-md rounded-2xl border border-gray-100">
           {/* Logo */}
           <img
             src="/logos/LogoEcoTruck.svg"
             alt="EcoTruck"
-            className="w-24 mx-auto mb-6"
+            className="w-32 mx-auto mb-6"
           />
 
-          {/* Mensaje animado */}
-          <p className="text-center text-gray-600 text-sm font-medium mb-4 min-h-[32px]">
-            <LoginMessage mensajes={mensajes} index={index} />
+          {/* Mensaje dinámico */}
+          <p className="text-center text-gray-600 text-sm font-medium mb-4 min-h-[32px] transition-all duration-700 ease-in-out">
+            {mensajes[index]}
           </p>
 
-          {/* Formulario */}
-          <LoginForm
-            email={email}
-            setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
-            showPassword={showPassword}
-            setShowPassword={setShowPassword}
-            handleLogin={handleLogin}
-            error={error}
-          />
+          /* Form */
+          <form onSubmit={handleLogin}>
+            <label className="block text-sm text-gray-600 mb-1 text-left">Correo electrónico</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="correo@ejemplo.com"
+            />
 
-          {/* Línea separadora */}
-          <div className="flex items-center gap-2 my-5">
-            <div className="flex-grow h-px bg-gray-300" />
-            <span className="text-gray-500 text-xs">o</span>
-            <div className="flex-grow h-px bg-gray-300" />
-          </div>
+            <label className="block text-sm text-gray-600 mb-1 text-left">Contraseña</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-500"
+              >
+                {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+              </button>
+            </div>
 
-          {/* OAuth Buttons */}
-          <LoginOAuthButtons />
+            {error && (
+              <p className="text-red-500 text-xs mb-3 text-center">{error}</p>
+            )}
 
-          {/* Footer */}
+            <button
+              type="submit"
+              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-all font-medium"
+            >
+              Iniciar sesión
+            </button>
+          </form>
           <p className="text-[10px] text-gray-500 mt-4 text-center leading-tight">
             Al continuar, aceptas nuestras políticas y términos de uso.
           </p>
