@@ -38,35 +38,5 @@ export const useSimulacionUbicacion = () => {
     }
   };
 
-  const validarYSetUbicacion = async (lat, lng) => {
-    try {
-      const resultado = await validarUbicacion(lat, lng);
-      setInfo({
-        ubicacion: { lat, lng },
-        zona: resultado.zona || "Zona desconocida",
-        camionId: resultado.camionId || "Sin asignar",
-        estadoZona: resultado.estadoZona || "Desconocido",
-        mensaje: resultado.mensaje || null,
-        camion: resultado.camion || null,
-      });
-      return { ok: true, resultado };
-    } catch (error) {
-      console.error("❌ Error al validar ubicaci\u00f3n:", error);
-      setInfo({
-        ubicacion: { lat, lng },
-        zona: null,
-        camionId: null,
-        estadoZona: null,
-        mensaje: "Error al conectar con el servidor",
-      });
-      return { ok: false, error };
-    }
-  };
-
-  const desconectar = () => {
-    // Limpia la info de simulación (desmarca la ubicación)
-    setInfo(null);
-  };
-
-  return { info, simularConexion, validarYSetUbicacion, desconectar };
+  return { info, simularConexion };
 };
