@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -147,6 +147,17 @@ const Login = () => {
               Iniciar sesión
             </button>
           </form>
+
+          {/* Enlace a registro */}
+          <p className="text-sm text-gray-600 mt-4 text-center">
+            ¿No tienes cuenta?{" "}
+            <Link
+              to="/register"
+              className="text-green-600 font-medium hover:underline"
+            >
+              Regístrate aquí
+            </Link>
+          </p>
 
           <p className="text-[10px] text-gray-500 mt-4 text-center leading-tight">
             Al continuar, aceptas nuestras políticas y términos de uso.
